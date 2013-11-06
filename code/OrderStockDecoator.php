@@ -1,13 +1,9 @@
 <?php
-class OrderStockDecoator extends DataObjectDecorator{
+class OrderStockDecoator extends DataExtension {
 	
-	function extraStatics(){
-		return array(
-			'db' => array(
-				'StockHasBeenCalculated' => 'Boolean'
-			)
-		);
-	}
+	public static $db = array(
+		'StockHasBeenCalculated' => 'Boolean'
+	);
 	
 	function onBeforeWrite(){ 
       	if($this->owner->Status == 'Paid' && $this->owner->StockHasBeenCalculated == 0){
@@ -24,8 +20,16 @@ class OrderStockDecoator extends DataObjectDecorator{
 	      			}
       			}
       		}
-      		
-      	}
+      	}      	      	if(($this->owner->Status == 'AdminCancelled' && $this->owner->StockHasBeenCalculated == 1) || ($this->owner->Status == 'MemberCancelled' && $this->owner->StockHasBeenCalculated == 1)){      		if($orderItems = $this->owner->Items()){
+      			foreach ($orderItems as $orderItem){
+      				if($buyable = $orderItem->Buyable()){
+      						$oldNum = $buyable->Stock;
+      						$newNum = $oldNum + $orderItem->Quantity;
+      						$buyable->Stock = $newNum;
+      						$buyable->write();
+      				}
+      			}
+      		}      	}
       	parent::onBeforeWrite();
    	} 
 }
