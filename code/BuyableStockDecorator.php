@@ -23,7 +23,7 @@ class BuyableStockDecorator extends DataExtension {
 	   		if($product = $this->owner->Product()){
     			$allowpurchase = ($this->owner->sellingPrice() > 0) && $product->AllowPurchase;
 			}
-			if($this->getVariationsStock() < 1){
+			if($this->owner->Stock < 1){
 				$allowpurchase = false;
 			}
     		return $allowpurchase;
